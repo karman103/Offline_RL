@@ -23,7 +23,7 @@ while getopts ":c:m:a:" opt; do
 done
  
 #ckpt_folder="$1"
-ckpt_dir="VizDoom/VizDoom_checkpoints/${ckpt_folder##*/}"
+ckpt_dir="RATE/VizDoom/VizDoom_checkpoints/${ckpt_folder##*/}"
 cd "$ckpt_dir"
 # # echo $(pwd)
 echo "Selected mode: ${mode%/}"

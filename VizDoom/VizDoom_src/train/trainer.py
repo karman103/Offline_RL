@@ -18,6 +18,9 @@ import warnings
 warnings.filterwarnings('ignore')
 import torch.nn as nn
 
+
+# seeds
+# TODO: get rid of this
 reds = [2, 3, 6, 8, 9, 10, 11, 14, 15, 16, 17, 18, 20, 21, 25, 26, 27, 28, 29, 31, 38, 40, 41, 42, 45,
         46, 49, 50, 51, 52, 53, 54, 55, 58, 59, 60, 61, 63, 64, 67, 68, 70, 72, 73, 74, 77, 80, 82, 84, 
         86, 88, 89, 90, 91, 92, 97, 98, 99, 100, 101, 103, 106, 108, 109, 113, 115, 116, 117, 120, 
@@ -30,7 +33,6 @@ greens = [0, 1, 4, 5, 7, 12, 13, 19, 22, 23, 24, 30, 32, 33, 34, 35, 36, 37, 39,
           163, 166, 167, 168, 169, 172, 175, 176, 177, 182, 183, 187, 190, 192, 193, 195, 199, 204, 206, 208, 
           209, 210, 212, 215, 216, 218, 219, 220, 221, 223, 224, 225]
 
-
 def train(ckpt_path, config, train_dataloader, mean, std, max_segments, experiment):
 
     cos = nn.CosineSimilarity(dim=-1, eps=1e-6)
@@ -42,8 +44,9 @@ def train(ckpt_path, config, train_dataloader, mean, std, max_segments, experime
     MEAN = mean
     STD = std
 
+    # DT will be abstracted here
     model = mem_transformer_v2_GTrXL.MemTransformerLM(**config["model_config"])
-
+    print("Initialized the model to DT")
     print(config)
     
     torch.nn.init.xavier_uniform_(model.r_w_bias);
@@ -120,7 +123,7 @@ def train(ckpt_path, config, train_dataloader, mean, std, max_segments, experime
 
                 if config["model_config"]["num_mem_tokens"] > 0:
                     mean_tokens = torch.mean(mem_tokens, dim=1)[0]
-
+                    
                     if tokens_dict[block_part] is not None:
                         cos_sim = cos(mean_tokens, tokens_dict[block_part]).item()
                     else:
@@ -209,27 +212,64 @@ def train(ckpt_path, config, train_dataloader, mean, std, max_segments, experime
                     model.eval()
                     with torch.no_grad():
                         FRAME_SKIP = 2
+                        
+                        
+                        # def optimize_pillar(color, seeds, config, wwandb, wcomet):
+                        #     for ret in [config["online_inference_config"]["desired_return_1"]]:
+                        #         returns = []
+                        #         ts = []
+                        #         attn_map_received = False
+                        #         for i in range(len(seeds)):
+                        #             episode_return, act_list, t, _, _, attn_map = get_returns_VizDoom(model=model, ret=ret, seed=seeds[i], 
+                        #                                                                     episode_timeout=episode_timeout, 
+                        #                                                                     context_length=config["training_config"]["context_length"], 
+                        #                                                                     device=device, act_dim=config["model_config"]["ACTION_DIM"], 
+                        #                                                                     config=config,
+                        #                                                                     mean=MEAN,
+                        #                                                                     std=STD,
+                        #                                                                     use_argmax=config["online_inference_config"]["use_argmax"],
+                        #                                                                     create_video=False)
+
+                        #             returns.append(episode_return)
+                        #             t *= FRAME_SKIP
+                        #             ts.append(t)
+
+                        #             pbar.set_description(f"Online inference {color} {ret}: [{i+1} / {len(seeds)}] Time: {t}, Return: {episode_return:.2f}")
+
+                        #         returns_mean = np.mean(returns)
+                        #         lifetime_mean = np.mean(ts)
+
+                        #         if wwandb:
+                        #             wandb.log({f"LifeTimeMean_{color}_{ret}": lifetime_mean, 
+                        #                     f"ReturnsMean_{color}_{ret}": returns_mean})
+                        #         elif wcomet:
+                        #             experiment.log_metrics({f"LifeTimeMean_{color}_{ret}": lifetime_mean, 
+                        #                                    f"ReturnsMean_{color}_{ret}": returns_mean}, step=it_counter)
+    
+                        #     return returns, ts
                         def optimize_pillar(color, seeds, config, wwandb, wcomet):
                             for ret in [config["online_inference_config"]["desired_return_1"]]:
                                 returns = []
                                 ts = []
                                 attn_map_received = False
                                 for i in range(len(seeds)):
-                                    episode_return, act_list, t, _, _, attn_map = get_returns_VizDoom(model=model, ret=ret, seed=seeds[i], 
-                                                                                            episode_timeout=episode_timeout, 
-                                                                                            context_length=config["training_config"]["context_length"], 
-                                                                                            device=device, act_dim=config["model_config"]["ACTION_DIM"], 
-                                                                                            config=config,
-                                                                                            mean=MEAN,
-                                                                                            std=STD,
-                                                                                            use_argmax=config["online_inference_config"]["use_argmax"],
-                                                                                            create_video=False)
+                                  print("in optimize piller")
+                                  episode_return, act_list, t, _, _, attn_map = get_returns_VizDoom(model=model, ret=ret, seed=None, # seed=seeds[i], 
+                                                                                          episode_timeout=episode_timeout, 
+                                                                                          context_length=config["training_config"]["context_length"], 
+                                                                                          device=device, act_dim=config["model_config"]["ACTION_DIM"], 
+                                                                                          config=config,
+                                                                                          mean=MEAN,
+                                                                                          std=STD,
+                                                                                          use_argmax=config["online_inference_config"]["use_argmax"],
+                                                                                          create_video=False)
+                                                                                      
+                                  print(f"debug info: episode return is {episode_return} and act_list is {act_list}")
+                                  returns.append(episode_return)
+                                  t *= FRAME_SKIP
+                                  ts.append(t)
 
-                                    returns.append(episode_return)
-                                    t *= FRAME_SKIP
-                                    ts.append(t)
-
-                                    pbar.set_description(f"Online inference {color} {ret}: [{i+1} / {len(seeds)}] Time: {t}, Return: {episode_return:.2f}")
+                                pbar.set_description(f"Online inference {color} {ret}: [{i+1} / {len(seeds)}] Time: {t}, Return: {episode_return:.2f}")
 
                                 returns_mean = np.mean(returns)
                                 lifetime_mean = np.mean(ts)
@@ -242,10 +282,11 @@ def train(ckpt_path, config, train_dataloader, mean, std, max_segments, experime
                                                            f"ReturnsMean_{color}_{ret}": returns_mean}, step=it_counter)
     
                             return returns, ts
-
                         total_returns, total_ts = [], []
+                        # Frame skipping 
                         SKIP_RETURN = 4
 
+                        # 
                         # RED PILLAR
                         seeds_red = reds[::SKIP_RETURN]
                         red_returns, red_ts = optimize_pillar("red", seeds_red, config, wwandb, wcomet)
@@ -267,42 +308,6 @@ def train(ckpt_path, config, train_dataloader, mean, std, max_segments, experime
                         elif wcomet:
                             experiment.log_metrics({f"LifeTimeMean_{config['online_inference_config']['desired_return_1']}": total_ts, 
                                                     f"ReturnsMean_{config['online_inference_config']['desired_return_1']}": total_returns}, step=it_counter)
-
-                elif config["model_config"]["mode"] == 'memory_maze':
-                    model.eval()
-                    with torch.no_grad():
-                        seeds = np.arange(0, 100).tolist()[::4]
-                        for ret in [config["online_inference_config"]["desired_return_1"]]:
-                            attn_map_received = False
-                            returns = []
-                            ts = []
-                            for i in range(len(seeds)):
-                                episode_return, act_list, t, _, _, attn_map = get_returns_MemoryMaze(model=model, ret=ret, seed=seeds[i], 
-                                                                                        episode_timeout=episode_timeout, 
-                                                                                        context_length=config["training_config"]["context_length"], 
-                                                                                        device=device, act_dim=config["model_config"]["ACTION_DIM"], 
-                                                                                        config=config,
-                                                                                        mean=MEAN,
-                                                                                        std=STD,
-                                                                                        use_argmax=config["online_inference_config"]["use_argmax"],
-                                                                                        create_video=False)
-
-                                returns.append(episode_return)
-                                ts.append(t)
-                                pbar.set_description(f"Online inference_{ret}: [{i+1} / {len(seeds)}] Time: {t}, Return: {episode_return:.2f}")
-
-                            returns_mean = np.mean(returns)
-                            returns_max = np.max(returns)
-                            lifetime_mean = np.mean(ts)
-
-                            if wwandb:
-                                wandb.log({f"LifeTimeMean_{ret}":   lifetime_mean,
-                                           f"ReturnsMax_{ret}":     returns_max,
-                                           f"ReturnsMean_{ret}":    returns_mean})
-                            elif wcomet:
-                                experiment.log_metrics({f"LifeTimeMean_{ret}":   lifetime_mean,
-                                           f"ReturnsMax_{ret}":     returns_max,
-                                           f"ReturnsMean_{ret}":    returns_mean}, step=it_counter)
                                 
             model.train()
             wandb_step += 1 

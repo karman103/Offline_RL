@@ -291,6 +291,8 @@ class DoomEnvironmentDisappear(object):
             last_action = self.game.get_last_action(),
             is_red = self.is_red_episode(),
         )
+        print(self.game.get_game_variable(GameVariable.KILLCOUNT))
+        print(self.game.get_game_variable(GameVariable.DEAD))
         return info
 
     def step(self, action, human_play=False):
@@ -308,6 +310,9 @@ class DoomEnvironmentDisappear(object):
             self.player_info.update(new_x, new_y, math.radians(new_theta))
 
         info = self.get_info() if self.use_info else None
+
+        print(self.game.get_game_variable(GameVariable.KILLCOUNT))
+        print(self.game.get_game_variable(GameVariable.DEAD))
         return obs, reward*self.reward_scaling, done, info
 
     def _check_health(self):

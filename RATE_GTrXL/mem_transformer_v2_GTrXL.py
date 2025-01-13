@@ -70,59 +70,56 @@ class MemTransformerLM(nn.Module):
         self.embed_ln = nn.LayerNorm(d_embed)
         self.ret_emb = nn.Linear(1, d_embed)
         
-        if self.mode in ['mujoco','tmaze', 'aar']:
-            self.state_encoder = nn.Sequential(
-                                    nn.Linear(self.STATE_DIM, d_embed), #RMT MUJOCO
-                                    nn.ReLU())
+        # if self.mode in ['mujoco','tmaze', 'aar']:
+        #     self.state_encoder = nn.Sequential(
+        #                             nn.Linear(self.STATE_DIM, d_embed), #RMT MUJOCO
+        #                             nn.ReLU())
             
-        if self.mode in ['atari']:
-            self.state_encoder = nn.Sequential(
-                                 nn.Conv2d(4, 32, 8, stride=4, padding=0), nn.ReLU(),
-                                 nn.Conv2d(32, 64, 4, stride=2, padding=0), nn.ReLU(),
-                                 nn.Conv2d(64, 64, 3, stride=1, padding=0), nn.ReLU(),
-                                 nn.Flatten(), nn.Linear(3136, d_embed), nn.Tanh())
+        # if self.mode in ['atari']:
+        #     self.state_encoder = nn.Sequential(
+        #                          nn.Conv2d(4, 32, 8, stride=4, padding=0), nn.ReLU(),
+        #                          nn.Conv2d(32, 64, 4, stride=2, padding=0), nn.ReLU(),
+        #                          nn.Conv2d(64, 64, 3, stride=1, padding=0), nn.ReLU(),
+        #                          nn.Flatten(), nn.Linear(3136, d_embed), nn.Tanh())
             
-        if self.mode in ['key_to_door']:
-            self.state_encoder = nn.Sequential(nn.Conv2d(1, 32, kernel_size=3, padding=1),
-                                               nn.ReLU(inplace=True),
-                                               nn.Conv2d(32, 64, kernel_size=3, padding=1),
-                                               nn.ReLU(inplace=True),
-                                               nn.MaxPool2d(kernel_size=2, stride=2),
+        # if self.mode in ['key_to_door']:
+        #     self.state_encoder = nn.Sequential(nn.Conv2d(1, 32, kernel_size=3, padding=1),
+        #                                        nn.ReLU(inplace=True),
+        #                                        nn.Conv2d(32, 64, kernel_size=3, padding=1),
+        #                                        nn.ReLU(inplace=True),
+        #                                        nn.MaxPool2d(kernel_size=2, stride=2),
 
-                                               nn.Conv2d(64, 64, kernel_size=3, padding=1),
-                                               nn.ReLU(inplace=True),
-                                               nn.Conv2d(64, 1, kernel_size=2, padding=1),
-                                               nn.ReLU(inplace=True),
+        #                                        nn.Conv2d(64, 64, kernel_size=3, padding=1),
+        #                                        nn.ReLU(inplace=True),
+        #                                        nn.Conv2d(64, 1, kernel_size=2, padding=1),
+        #                                        nn.ReLU(inplace=True),
 
-                                               nn.Flatten(start_dim=2),
-                                               nn.Linear(16, d_embed),
-                                               nn.ReLU())     
+        #                                        nn.Flatten(start_dim=2),
+        #                                        nn.Linear(16, d_embed),
+        #                                        nn.ReLU())             
 
+        # if self.mode == 'mujoco':
+        #     self.head = nn.Sequential(*([nn.Linear(d_embed, self.ACTION_DIM)] + ([nn.Tanh()])))
+        #     self.state_encoder = nn.Linear(self.STATE_DIM, d_embed)
+        #     self.action_embeddings = nn.Linear(self.ACTION_DIM, d_embed)
+        #     self.ret_emb = nn.Linear(1, d_embed)
+
+        # if self.mode == 'atari':
+        #     self.head = nn.Linear(d_embed, n_token, bias=False)
+        #     self.state_encoder = nn.Sequential(nn.Conv2d(4, 32, 8, stride=4, padding=0), 
+        #                                        nn.ReLU(),
+        #                                        nn.Conv2d(32, 64, 4, stride=2, padding=0), 
+        #                                        nn.ReLU(),
+        #                                        nn.Conv2d(64, 64, 3, stride=1, padding=0), 
+        #                                        nn.ReLU(),
+        #                                        nn.Flatten(), 
+        #                                        nn.Linear(3136, d_embed), 
+        #                                        nn.Tanh())
+        #     self.action_embeddings = nn.Sequential(nn.Embedding(n_token, d_embed), nn.Tanh())
+        #     self.ret_emb = nn.Sequential(nn.Linear(1, d_embed), nn.Tanh())
         
-
-        if self.mode == 'mujoco':
-            self.head = nn.Sequential(*([nn.Linear(d_embed, self.ACTION_DIM)] + ([nn.Tanh()])))
-            self.state_encoder = nn.Linear(self.STATE_DIM, d_embed)
-            self.action_embeddings = nn.Linear(self.ACTION_DIM, d_embed)
-            self.ret_emb = nn.Linear(1, d_embed)
-
-        if self.mode == 'atari':
-            self.head = nn.Linear(d_embed, n_token, bias=False)
-            self.state_encoder = nn.Sequential(nn.Conv2d(4, 32, 8, stride=4, padding=0), 
-                                               nn.ReLU(),
-                                               nn.Conv2d(32, 64, 4, stride=2, padding=0), 
-                                               nn.ReLU(),
-                                               nn.Conv2d(64, 64, 3, stride=1, padding=0), 
-                                               nn.ReLU(),
-                                               nn.Flatten(), 
-                                               nn.Linear(3136, d_embed), 
-                                               nn.Tanh())
-            self.action_embeddings = nn.Sequential(nn.Embedding(n_token, d_embed), nn.Tanh())
-            self.ret_emb = nn.Sequential(nn.Linear(1, d_embed), nn.Tanh())
-        
-        if self.mode == 'key_to_door':
-            self.head = nn.Sequential(*([nn.Linear(d_embed, 4)] + ([nn.Tanh()])))    
-
+        # if self.mode == 'key_to_door':
+        #     self.head = nn.Sequential(*([nn.Linear(d_embed, 4)] + ([nn.Tanh()])))    
 
 
         if self.mode == 'doom':
@@ -138,45 +135,44 @@ class MemTransformerLM(nn.Module):
             self.action_embeddings = nn.Sequential(nn.Embedding(self.ACTION_DIM, d_embed), nn.Tanh())
             self.ret_emb = nn.Sequential(nn.Linear(1, d_embed), nn.Tanh())
 
-        if self.mode == 'minigrid_memory':
-            self.head = nn.Linear(d_embed, self.ACTION_DIM, bias=False)
-            self.state_encoder = nn.Sequential(nn.Conv2d(3, 32, 8, stride=4, padding=0),
-                                           	nn.ReLU(),
-                                           	nn.Conv2d(32, 64, 4, stride=2, padding=0),
-                                           	nn.ReLU(),
-                                           	nn.Conv2d(64, 64, 3, stride=1, padding=0),
-                                           	nn.ReLU(), 
-                                           	nn.Flatten(), nn.Linear(3136, d_embed))
-            self.action_embeddings = nn.Sequential(nn.Embedding(self.ACTION_DIM, d_embed))
-            self.ret_emb = nn.Sequential(nn.Linear(1, d_embed))
+        # if self.mode == 'minigrid_memory':
+        #     self.head = nn.Linear(d_embed, self.ACTION_DIM, bias=False)
+        #     self.state_encoder = nn.Sequential(nn.Conv2d(3, 32, 8, stride=4, padding=0),
+        #                                    	nn.ReLU(),
+        #                                    	nn.Conv2d(32, 64, 4, stride=2, padding=0),
+        #                                    	nn.ReLU(),
+        #                                    	nn.Conv2d(64, 64, 3, stride=1, padding=0),
+        #                                    	nn.ReLU(), 
+        #                                    	nn.Flatten(), nn.Linear(3136, d_embed))
+        #     self.action_embeddings = nn.Sequential(nn.Embedding(self.ACTION_DIM, d_embed))
+        #     self.ret_emb = nn.Sequential(nn.Linear(1, d_embed))
 
-        if self.mode == 'memory_maze':
-            self.head = nn.Linear(d_embed, self.ACTION_DIM, bias=False)
-            # * v9 /  v8_RATE_pad_2: model parameters: 2324656
-            self.state_encoder = nn.Sequential(nn.Conv2d(3, 32, 8, stride=4, padding=2),
-                                    nn.ReLU(), 
-                                    nn.Conv2d(32, 64, 4, stride=2, padding=2),
-                                    nn.ReLU(),
-                                    nn.Conv2d(64, 64, 3, stride=1, padding=2),
-                                    nn.ReLU(),
-                                    nn.Flatten(), nn.Linear(7744, d_embed), # 211 -> 4096 222 -> 7744 222+mp2 -> 1600
-                                    nn.Tanh())
+        # if self.mode == 'memory_maze':
+        #     self.head = nn.Linear(d_embed, self.ACTION_DIM, bias=False)
+        #     # * v9 /  v8_RATE_pad_2: model parameters: 2324656
+        #     self.state_encoder = nn.Sequential(nn.Conv2d(3, 32, 8, stride=4, padding=2),
+        #                             nn.ReLU(), 
+        #                             nn.Conv2d(32, 64, 4, stride=2, padding=2),
+        #                             nn.ReLU(),
+        #                             nn.Conv2d(64, 64, 3, stride=1, padding=2),
+        #                             nn.ReLU(),
+        #                             nn.Flatten(), nn.Linear(7744, d_embed), # 211 -> 4096 222 -> 7744 222+mp2 -> 1600
+        #                             nn.Tanh())
 
-            self.action_embeddings = nn.Sequential(nn.Embedding(self.ACTION_DIM, d_embed), nn.Tanh())
-            self.ret_emb = nn.Sequential(nn.Linear(1, d_embed), nn.Tanh()) 
+        #     self.action_embeddings = nn.Sequential(nn.Embedding(self.ACTION_DIM, d_embed), nn.Tanh())
+        #     self.ret_emb = nn.Sequential(nn.Linear(1, d_embed), nn.Tanh()) 
         
-        if self.mode == 'tmaze':
-            self.head = nn.Linear(d_embed, 4, bias=False)
-            self.action_embeddings = nn.Sequential(nn.Embedding(4+1, d_embed), nn.Tanh())
-            self.ret_emb = nn.Linear(1, d_embed)
-            self.state_encoder = nn.Linear(self.STATE_DIM, d_embed)
+        # if self.mode == 'tmaze':
+        #     self.head = nn.Linear(d_embed, 4, bias=False)
+        #     self.action_embeddings = nn.Sequential(nn.Embedding(4+1, d_embed), nn.Tanh())
+        #     self.ret_emb = nn.Linear(1, d_embed)
+        #     self.state_encoder = nn.Linear(self.STATE_DIM, d_embed)
 
-        if self.mode == 'aar':
-            self.head = nn.Linear(d_embed, 3, bias=False)
-            self.action_embeddings = nn.Sequential(nn.Embedding(3+1, d_embed), nn.Tanh())
-            self.ret_emb = nn.Linear(1, d_embed)
-            self.state_encoder = nn.Linear(self.STATE_DIM, d_embed)
-            
+        # if self.mode == 'aar':
+        #     self.head = nn.Linear(d_embed, 3, bias=False)
+        #     self.action_embeddings = nn.Sequential(nn.Embedding(3+1, d_embed), nn.Tanh())
+        #     self.ret_emb = nn.Linear(1, d_embed)
+        #     self.state_encoder = nn.Linear(self.STATE_DIM, d_embed)
 
 
         self.drop = nn.Dropout(dropout)
@@ -613,211 +609,211 @@ class MemTransformerLM(nn.Module):
         
         loss = None
         if target is not None:
-            if self.mode == 'mujoco':
-                loss = nn.MSELoss()(logits, target)
+            # if self.mode == 'mujoco':
+            #     loss = nn.MSELoss()(logits, target)
                 
-            if self.mode == 'tmaze':
-                """ SELECT TARGETS FOR THE LAST LOSS """
-                if self.flag == 1:
-                    logits_last = torch.zeros((logits.shape[0], 1, 4))
-                    target_last = torch.zeros((target.shape[0], 1, 1))
-                    for batch_num in range(logits.shape[0]):
-                        ind = torch.where(target[batch_num].squeeze()==-10)[0][0].item() - 1
-                        logits_last[batch_num] = logits[batch_num, ind]
-                        target_last[batch_num] = target[batch_num, ind]
-                """ ================================ """
+            # if self.mode == 'tmaze':
+            #     """ SELECT TARGETS FOR THE LAST LOSS """
+            #     if self.flag == 1:
+            #         logits_last = torch.zeros((logits.shape[0], 1, 4))
+            #         target_last = torch.zeros((target.shape[0], 1, 1))
+            #         for batch_num in range(logits.shape[0]):
+            #             ind = torch.where(target[batch_num].squeeze()==-10)[0][0].item() - 1
+            #             logits_last[batch_num] = logits[batch_num, ind]
+            #             target_last[batch_num] = target[batch_num, ind]
+            #     """ ================================ """
                 
-                """ CALCULATE TRAIN SUCCES RATE """
-                if self.flag == 1:
-                    train_sr = 0
-                    with torch.no_grad():
-                        for tr_batch_num in range(target.shape[0]):
-                            y_real = target[tr_batch_num].squeeze()
-                            mask_real = masks[tr_batch_num]
-                            act_real = torch.sum(y_real * mask_real)
-                            y_pred = torch.argmax(torch.softmax(logits[tr_batch_num].squeeze(), dim=-1), dim=-1)
-                            act_pred = y_pred[torch.where(y_real != 0)[0][0].item()]
-                            if act_pred == act_real:
-                                train_sr += 1
-                        self.last_acc = train_sr / target.shape[0]
-                """ =========================== """
+            #     """ CALCULATE TRAIN SUCCES RATE """
+            #     if self.flag == 1:
+            #         train_sr = 0
+            #         with torch.no_grad():
+            #             for tr_batch_num in range(target.shape[0]):
+            #                 y_real = target[tr_batch_num].squeeze()
+            #                 mask_real = masks[tr_batch_num]
+            #                 act_real = torch.sum(y_real * mask_real)
+            #                 y_pred = torch.argmax(torch.softmax(logits[tr_batch_num].squeeze(), dim=-1), dim=-1)
+            #                 act_pred = y_pred[torch.where(y_real != 0)[0][0].item()]
+            #                 if act_pred == act_real:
+            #                     train_sr += 1
+            #             self.last_acc = train_sr / target.shape[0]
+            #     """ =========================== """
                 
-                # LOSSES
-                ## ACCURACY
-                probs = torch.softmax(logits, dim=-1)
-                ans = torch.argmax(probs, dim=-1)
-                for batch_num in range(target.shape[0]):
-                    if -10 in target[batch_num]:
-                        ind = torch.where(target[batch_num]==-10)[0][0].item()
-                        ans[batch_num, ind:] = -10
+            #     # LOSSES
+            #     ## ACCURACY
+            #     probs = torch.softmax(logits, dim=-1)
+            #     ans = torch.argmax(probs, dim=-1)
+            #     for batch_num in range(target.shape[0]):
+            #         if -10 in target[batch_num]:
+            #             ind = torch.where(target[batch_num]==-10)[0][0].item()
+            #             ans[batch_num, ind:] = -10
                         
-                labels = target.squeeze(-1)
-                self.accuracy = torch.mean(torch.eq(ans, labels).float())
+            #     labels = target.squeeze(-1)
+            #     self.accuracy = torch.mean(torch.eq(ans, labels).float())
                 
-                ## LAST LOSS
-                if self.flag == 1:
-                    criterion_last = nn.CrossEntropyLoss(ignore_index=-10)
-                    logits_last = logits_last.reshape(-1, logits_last.shape[-1])
-                    target_last = target_last.reshape(-1).long()
-                    self.loss_last = criterion_last(logits_last, target_last)
+            #     ## LAST LOSS
+            #     if self.flag == 1:
+            #         criterion_last = nn.CrossEntropyLoss(ignore_index=-10)
+            #         logits_last = logits_last.reshape(-1, logits_last.shape[-1])
+            #         target_last = target_last.reshape(-1).long()
+            #         self.loss_last = criterion_last(logits_last, target_last)
                 
-                ## FULL LOSS
-                weight_not_important = 1
-                weights_acts = torch.tensor([weight_not_important, 1, weight_not_important, 1], device=logits.device, dtype=torch.float32)
-                criterion_all = nn.CrossEntropyLoss(ignore_index=-10, weight=weights_acts, reduction='mean')
-                logits = logits.reshape(-1, logits.size(-1))
-                target = target.reshape(-1).long()
-                self.loss_all = criterion_all(logits, target)
+            #     ## FULL LOSS
+            #     weight_not_important = 1
+            #     weights_acts = torch.tensor([weight_not_important, 1, weight_not_important, 1], device=logits.device, dtype=torch.float32)
+            #     criterion_all = nn.CrossEntropyLoss(ignore_index=-10, weight=weights_acts, reduction='mean')
+            #     logits = logits.reshape(-1, logits.size(-1))
+            #     target = target.reshape(-1).long()
+            #     self.loss_all = criterion_all(logits, target)
 
-            if self.mode == 'aar':
-                """ START OF GIGALOSS """
-                probs_0, probs_1 = 0, 0
-                probs_0_cnt, probs_1_cnt = 0, 0
-                acc_0, acc_1 = 0, 0
+            # if self.mode == 'aar':
+            #     """ START OF GIGALOSS """
+            #     probs_0, probs_1 = 0, 0
+            #     probs_0_cnt, probs_1_cnt = 0, 0
+            #     acc_0, acc_1 = 0, 0
 
-                logits_0 = torch.empty(1, 3).to(device=logits.device)
-                targets_0 = torch.empty(1, 1).to(device=target.device)
-                logits_1 = torch.empty(1, 3).to(device=logits.device)
-                targets_1 = torch.empty(1, 1).to(device=target.device)
+            #     logits_0 = torch.empty(1, 3).to(device=logits.device)
+            #     targets_0 = torch.empty(1, 1).to(device=target.device)
+            #     logits_1 = torch.empty(1, 3).to(device=logits.device)
+            #     targets_1 = torch.empty(1, 1).to(device=target.device)
 
-                # ? SINGLE
-                for batch_num in range(target.shape[0]):
-                    target_vector = target[batch_num]
-                    logits_vector = logits[batch_num]
-                    probs_vector = torch.softmax(logits_vector.squeeze(), dim=-1)
-                    predicts_vector = torch.argmax(probs_vector, dim=-1)
-                    if (target_vector == -10).all():
-                        # padded vector
-                        pass
-                    else:
-                        if (target_vector == 2).all():
-                            # staying vector
-                            pass
-                        else:
-                            # good for loss
-                            ind = torch.where(target[batch_num]==-10)[0]
-                            if len(ind) >= 1:
-                                ind = ind[0]
-                            if ind.numel() > 0:
-                                ind = ind.item()
-                                target_action = target_vector[ind-1].item()
-                                if target_action == 0:
-                                    prob_0 = probs_vector[ind-1][0].item()
-                                    probs_0 += prob_0
-                                    if predicts_vector[ind-1].item() == 0:
-                                        acc_0 += 1
-                                    probs_0_cnt += 1
-                                    logits_0 = torch.concatenate([logits_0, logits_vector[ind-1].unsqueeze(0)])
-                                    targets_0 = torch.concatenate([targets_0, target_vector[ind-1].unsqueeze(0)])
-                                elif target_action == 1:
-                                    prob_1 = probs_vector[ind-1][1].item()
-                                    probs_1 += prob_1
-                                    if predicts_vector[ind-1].item() == 1:
-                                        acc_1 += 1
-                                    probs_1_cnt += 1
-                                    logits_1 = torch.concatenate([logits_1, logits_vector[ind-1].unsqueeze(0)])
-                                    targets_1 = torch.concatenate([targets_1, target_vector[ind-1].unsqueeze(0)])
+            #     # ? SINGLE
+            #     for batch_num in range(target.shape[0]):
+            #         target_vector = target[batch_num]
+            #         logits_vector = logits[batch_num]
+            #         probs_vector = torch.softmax(logits_vector.squeeze(), dim=-1)
+            #         predicts_vector = torch.argmax(probs_vector, dim=-1)
+            #         if (target_vector == -10).all():
+            #             # padded vector
+            #             pass
+            #         else:
+            #             if (target_vector == 2).all():
+            #                 # staying vector
+            #                 pass
+            #             else:
+            #                 # good for loss
+            #                 ind = torch.where(target[batch_num]==-10)[0]
+            #                 if len(ind) >= 1:
+            #                     ind = ind[0]
+            #                 if ind.numel() > 0:
+            #                     ind = ind.item()
+            #                     target_action = target_vector[ind-1].item()
+            #                     if target_action == 0:
+            #                         prob_0 = probs_vector[ind-1][0].item()
+            #                         probs_0 += prob_0
+            #                         if predicts_vector[ind-1].item() == 0:
+            #                             acc_0 += 1
+            #                         probs_0_cnt += 1
+            #                         logits_0 = torch.concatenate([logits_0, logits_vector[ind-1].unsqueeze(0)])
+            #                         targets_0 = torch.concatenate([targets_0, target_vector[ind-1].unsqueeze(0)])
+            #                     elif target_action == 1:
+            #                         prob_1 = probs_vector[ind-1][1].item()
+            #                         probs_1 += prob_1
+            #                         if predicts_vector[ind-1].item() == 1:
+            #                             acc_1 += 1
+            #                         probs_1_cnt += 1
+            #                         logits_1 = torch.concatenate([logits_1, logits_vector[ind-1].unsqueeze(0)])
+            #                         targets_1 = torch.concatenate([targets_1, target_vector[ind-1].unsqueeze(0)])
 
-                probs_0_mean = probs_0 / probs_0_cnt if probs_0_cnt != 0 else 0
-                probs_1_mean = probs_1 / probs_1_cnt if probs_1_cnt != 0 else 0
+            #     probs_0_mean = probs_0 / probs_0_cnt if probs_0_cnt != 0 else 0
+            #     probs_1_mean = probs_1 / probs_1_cnt if probs_1_cnt != 0 else 0
 
-                acc_0 = acc_0 / probs_0_cnt if probs_0_cnt != 0 else 0
-                acc_1 = acc_1 / probs_1_cnt if probs_1_cnt != 0 else 0
+            #     acc_0 = acc_0 / probs_0_cnt if probs_0_cnt != 0 else 0
+            #     acc_1 = acc_1 / probs_1_cnt if probs_1_cnt != 0 else 0
 
-                logits_0, logits_1 = logits_0[1:], logits_1[1:]
-                targets_0, targets_1 = targets_0[1:], targets_1[1:]
+            #     logits_0, logits_1 = logits_0[1:], logits_1[1:]
+            #     targets_0, targets_1 = targets_0[1:], targets_1[1:]
 
-                self.loss_all_0, self.loss_all_1 = None, None
+            #     self.loss_all_0, self.loss_all_1 = None, None
                 
-                if self.flag == 1:
-                    criterion_0 = nn.CrossEntropyLoss(reduction='mean')
-                    logits_0 = logits_0.reshape(-1, logits.size(-1))
-                    targets_0 = targets_0.reshape(-1).long()
-                    self.loss_all_0 = criterion_0(logits_0, targets_0)
+            #     if self.flag == 1:
+            #         criterion_0 = nn.CrossEntropyLoss(reduction='mean')
+            #         logits_0 = logits_0.reshape(-1, logits.size(-1))
+            #         targets_0 = targets_0.reshape(-1).long()
+            #         self.loss_all_0 = criterion_0(logits_0, targets_0)
 
-                    criterion_1 = nn.CrossEntropyLoss(reduction='mean')
-                    logits_1 = logits_1.reshape(-1, logits.size(-1))
-                    targets_1 = targets_1.reshape(-1).long()
-                    self.loss_all_1 = criterion_1(logits_1, targets_1)
+            #         criterion_1 = nn.CrossEntropyLoss(reduction='mean')
+            #         logits_1 = logits_1.reshape(-1, logits.size(-1))
+            #         targets_1 = targets_1.reshape(-1).long()
+            #         self.loss_all_1 = criterion_1(logits_1, targets_1)
 
-                self.probs_0_mean, self.acc_0, self.loss_all_0 = probs_0_mean, acc_0, self.loss_all_0
-                self.probs_1_mean, self.acc_1, self.loss_all_1 = probs_1_mean, acc_1, self.loss_all_1
+            #     self.probs_0_mean, self.acc_0, self.loss_all_0 = probs_0_mean, acc_0, self.loss_all_0
+            #     self.probs_1_mean, self.acc_1, self.loss_all_1 = probs_1_mean, acc_1, self.loss_all_1
 
-                """ END OF GIGALOSS """
+            #     """ END OF GIGALOSS """
                 
-                """ SELECT TARGETS FOR THE LAST LOSS """
-                if self.flag == 1:
-                    logits_last = torch.zeros((logits.shape[0], 1, 3))
-                    target_last = torch.zeros((target.shape[0], 1, 1))
-                    for batch_num in range(logits.shape[0]):
-                        ind = torch.where(target[batch_num]==-10)[0]
-                        if len(ind) >= 1:
-                            ind = ind[0] - 1
-                        logits_last[batch_num] = logits[batch_num, ind]
-                        target_last[batch_num] = target[batch_num, ind]
-                """ ================================ """
+            #     """ SELECT TARGETS FOR THE LAST LOSS """
+            #     if self.flag == 1:
+            #         logits_last = torch.zeros((logits.shape[0], 1, 3))
+            #         target_last = torch.zeros((target.shape[0], 1, 1))
+            #         for batch_num in range(logits.shape[0]):
+            #             ind = torch.where(target[batch_num]==-10)[0]
+            #             if len(ind) >= 1:
+            #                 ind = ind[0] - 1
+            #             logits_last[batch_num] = logits[batch_num, ind]
+            #             target_last[batch_num] = target[batch_num, ind]
+            #     """ ================================ """
                 
-                """ CALCULATE TRAIN SUCCES RATE """
-                if self.flag == 1:
-                        self.last_acc = (self.acc_0 + self.acc_1) / 2
-                """ =========================== """
+            #     """ CALCULATE TRAIN SUCCES RATE """
+            #     if self.flag == 1:
+            #             self.last_acc = (self.acc_0 + self.acc_1) / 2
+            #     """ =========================== """
                 
-                # LOSSES
-                ## ACCURACY
-                probs = torch.softmax(logits, dim=-1)
-                ans = torch.argmax(probs, dim=-1)
-                for batch_num in range(target.shape[0]):
-                    if -10 in target[batch_num]:
-                        ind = torch.where(target[batch_num]==-10)[0][0].item()
-                        ans[batch_num, ind:] = -10
+            #     # LOSSES
+            #     ## ACCURACY
+            #     probs = torch.softmax(logits, dim=-1)
+            #     ans = torch.argmax(probs, dim=-1)
+            #     for batch_num in range(target.shape[0]):
+            #         if -10 in target[batch_num]:
+            #             ind = torch.where(target[batch_num]==-10)[0][0].item()
+            #             ans[batch_num, ind:] = -10
                         
-                labels = target.squeeze(-1)
-                self.accuracy = torch.mean(torch.eq(ans, labels).float())
+            #     labels = target.squeeze(-1)
+            #     self.accuracy = torch.mean(torch.eq(ans, labels).float())
                 
-                ## LAST LOSS
-                if self.flag == 1:
-                    criterion_last = nn.CrossEntropyLoss(ignore_index=-10)
-                    logits_last = logits_last.reshape(-1, logits_last.shape[-1])
-                    target_last = target_last.reshape(-1).long()
-                    self.loss_last = criterion_last(logits_last, target_last)
+            #     ## LAST LOSS
+            #     if self.flag == 1:
+            #         criterion_last = nn.CrossEntropyLoss(ignore_index=-10)
+            #         logits_last = logits_last.reshape(-1, logits_last.shape[-1])
+            #         target_last = target_last.reshape(-1).long()
+            #         self.loss_last = criterion_last(logits_last, target_last)
                 
-                ## FULL LOSS
-                criterion_all = nn.CrossEntropyLoss(ignore_index=-10, reduction='mean')
-                logits = logits.reshape(-1, logits.size(-1))
-                target = target.reshape(-1).long()
-                self.loss_all = criterion_all(logits, target)
+            #     ## FULL LOSS
+            #     criterion_all = nn.CrossEntropyLoss(ignore_index=-10, reduction='mean')
+            #     logits = logits.reshape(-1, logits.size(-1))
+            #     target = target.reshape(-1).long()
+            #     self.loss_all = criterion_all(logits, target)
             
             
-            if self.mode == 'associative-retrieval-seq-to-num':
-                self.accuracy = 0
-                self.loss_all = torch.tensor(0)
-                self.loss_last = torch.tensor(0)
+            # if self.mode == 'associative-retrieval-seq-to-num':
+            #     self.accuracy = 0
+            #     self.loss_all = torch.tensor(0)
+            #     self.loss_last = torch.tensor(0)
                 
             if self.mode == 'doom':
                 loss = F.cross_entropy(logits.reshape(-1, logits.size(-1)),
                                        target.reshape(-1).long())
 
-            if self.mode == 'memory_maze':
-                loss = F.cross_entropy(logits.reshape(-1, logits.size(-1)),
-                                       target.reshape(-1).long())
+            # if self.mode == 'memory_maze':
+            #     loss = F.cross_entropy(logits.reshape(-1, logits.size(-1)),
+            #                            target.reshape(-1).long())
                 
-            if self.mode == 'minigrid_memory':
-                loss = F.cross_entropy(logits.reshape(-1, logits.size(-1)),
-                                       target.reshape(-1).long(), ignore_index=-10)
+            # if self.mode == 'minigrid_memory':
+            #     loss = F.cross_entropy(logits.reshape(-1, logits.size(-1)),
+            #                            target.reshape(-1).long(), ignore_index=-10)
             
-            if self.mode == 'mujoco':
-                # loss = None
-                loss_fn = nn.MSELoss()
-                if target is not None:
-                    loss = loss_fn(logits, target)
-            if self.mode == 'atari':
-                if target is not None:
-                    loss = F.cross_entropy(logits.reshape(-1, logits.size(-1)), target.reshape(-1).long())
-            if self.mode == 'key_to_door':
-                masks = masks[:, :].unsqueeze(-1)
-                target = target * masks
-                logits = logits * masks.expand(-1, -1, logits.size(-1))
-                loss = F.cross_entropy(logits.reshape(-1, logits.size(-1)), target.reshape(-1).long())    
+            # if self.mode == 'mujoco':
+            #     # loss = None
+            #     loss_fn = nn.MSELoss()
+            #     if target is not None:
+            #         loss = loss_fn(logits, target)
+            # if self.mode == 'atari':
+            #     if target is not None:
+            #         loss = F.cross_entropy(logits.reshape(-1, logits.size(-1)), target.reshape(-1).long())
+            # if self.mode == 'key_to_door':
+            #     masks = masks[:, :].unsqueeze(-1)
+            #     target = target * masks
+            #     logits = logits * masks.expand(-1, -1, logits.size(-1))
+            #     loss = F.cross_entropy(logits.reshape(-1, logits.size(-1)), target.reshape(-1).long())    
                 
         
         output = [logits, loss]

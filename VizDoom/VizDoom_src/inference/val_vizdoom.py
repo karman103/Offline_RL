@@ -7,7 +7,7 @@ from TMaze_new.TMaze_new_src.utils import set_seed
 
 env_args = {
     'simulator':'doom', 
-    'scenario':'custom_scenario{:003}.cfg', #custom_scenario{:003}.cfg
+    'scenario':'custom_scenario_000.cfg', #custom_scenario{:003}.cfg
     'test_scenario':'', 
     'screen_size':'320X180', 
     'screen_height':64, 
@@ -88,7 +88,7 @@ def sample(model, x, block_size, steps, sample=False, top_k=None, actions=None, 
 
 def get_returns_VizDoom(model, ret, seed, episode_timeout, context_length, device, act_dim, config, mean, std, use_argmax=False, create_video=False):
     
-    set_seed(seed)
+    # set_seed(seed)
     
     # * USE ONLY LAST MEM TOKEN:
     use_only_last_mem_token = False
@@ -101,6 +101,7 @@ def get_returns_VizDoom(model, ret, seed, episode_timeout, context_length, devic
 
         
     scene = 0
+    print(f"env_args is {env_args['scenario']}")
     scenario = env_args['scenario_dir'] + env_args['scenario'].format(scene)
     config_env = scenario
 
@@ -261,6 +262,7 @@ def get_returns_VizDoom(model, ret, seed, episode_timeout, context_length, devic
         pred_return = target_return[0,-1] - (reward/scale)
         target_return = torch.cat([target_return, pred_return.reshape(1, 1)], dim=1)
         timesteps = torch.cat([timesteps,torch.ones((1, 1), device=device, dtype=torch.long) * (1)], dim=1)
+        print(f"the reward in thisepisode is {reward}")
         episode_return += reward
         episode_length += 1
         

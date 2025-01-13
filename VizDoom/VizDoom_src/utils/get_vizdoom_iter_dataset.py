@@ -46,7 +46,8 @@ class ViZDoomIterDataset(Dataset):
         for idx in tqdm(range(len(self.file_list))):
             file_path = os.path.join(self.directory, self.file_list[idx])
             data = np.load(file_path)
-            if data['obs'].shape[0] == self.max_length:
+            if data['observations'].shape[0] == self.max_length:
+            # if data['obs'].shape[0] == self.max_length:
                 self.filtered_list.append(self.file_list[idx])
 
     def __len__(self):
@@ -57,11 +58,14 @@ class ViZDoomIterDataset(Dataset):
         #print(file_path)
         data = np.load(file_path)
 
-        s = data['obs']
-        a = data['action']
-        r = data['reward']
-        d = data['done']
-        
+        # s = data['obs']
+        # a = data['action']
+        # r = data['reward']
+        # d = data['done']
+        s = data['observations']
+        a = data['actions']
+        r = data['rewards']
+        d = data['dones']
         s = torch.from_numpy(s).float()
 
         if self.normalize == 1:

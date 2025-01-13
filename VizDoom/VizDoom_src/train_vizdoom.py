@@ -32,6 +32,7 @@ with open("wandb_config.yaml") as f:
 os.environ['WANDB_API_KEY'] = wandb_config['wandb_api']
 # os.environ['COMET_API_KEY'] = wandb_config['comet_ml_api']
 
+print(os.getcwd())
 with open("VizDoom/VizDoom_src/config.yaml") as f:
     config = yaml.load(f, Loader=yaml.FullLoader)
 
@@ -89,13 +90,13 @@ if __name__ == '__main__':
         max_segments = config["training_config"]["sections"]
 
         """ MODEL MODE """
-        if config["model_mode"] == "RATE": 
-            config["model_config"]["mem_len"] = 2
-            config["model_config"]["mem_at_end"] = True
-            max_length = config["training_config"]["sections"]*config["training_config"]["context_length"]
+        # if config["model_mode"] == "RATE": 
+        #     config["model_config"]["mem_len"] = 2
+        #     config["model_config"]["mem_at_end"] = True
+        #     max_length = config["training_config"]["sections"]*config["training_config"]["context_length"]
         
 
-        elif config["model_mode"] == "DT":
+        if config["model_mode"] == "DT":
             config["model_config"]["mem_len"] = 0
             config["model_config"]["mem_at_end"] = False
             config["model_config"]["num_mem_tokens"] = 0
@@ -103,25 +104,25 @@ if __name__ == '__main__':
             config["training_config"]["sections"] = 1
             max_length = config["training_config"]["context_length"]
 
-        elif config["model_mode"] == "DTXL":
-            config["model_config"]["mem_len"] = 2
-            config["model_config"]["mem_at_end"] = False
-            config["model_config"]["num_mem_tokens"] = 0 
-            config["training_config"]["context_length"] = config["training_config"]["context_length"] * config["training_config"]["sections"]
-            config["training_config"]["sections"] = 1
-            max_length = config["training_config"]["context_length"]
+        # elif config["model_mode"] == "DTXL":
+        #     config["model_config"]["mem_len"] = 2
+        #     config["model_config"]["mem_at_end"] = False
+        #     config["model_config"]["num_mem_tokens"] = 0 
+        #     config["training_config"]["context_length"] = config["training_config"]["context_length"] * config["training_config"]["sections"]
+        #     config["training_config"]["sections"] = 1
+        #     max_length = config["training_config"]["context_length"]
 
-        elif config["model_mode"] == "RATEM":
-            config["model_config"]["mem_len"] = 0
-            config["model_config"]["mem_at_end"] = True
-            max_length = config["training_config"]["sections"]*config["training_config"]["context_length"]
+        # elif config["model_mode"] == "RATEM":
+        #     config["model_config"]["mem_len"] = 0
+        #     config["model_config"]["mem_at_end"] = True
+        #     max_length = config["training_config"]["sections"]*config["training_config"]["context_length"]
 
-        elif config["model_mode"] == "RATE_wo_nmt":
-            print("Custom Mode!!! RATE wo nmt")
-            config["model_config"]["mem_len"] = 2
-            config["model_config"]["mem_at_end"] = False
-            config["model_config"]["num_mem_tokens"] = 0
-            max_length = config["training_config"]["sections"]*config["training_config"]["context_length"]
+        # elif config["model_mode"] == "RATE_wo_nmt":
+        #     print("Custom Mode!!! RATE wo nmt")
+        #     config["model_config"]["mem_len"] = 2
+        #     config["model_config"]["mem_at_end"] = False
+        #     config["model_config"]["num_mem_tokens"] = 0
+        #     max_length = config["training_config"]["sections"]*config["training_config"]["context_length"]
         
 
         print(f"Selected Model: {config['model_mode']}")  
@@ -170,7 +171,7 @@ if __name__ == '__main__':
         train_dataloader = DataLoader(train_dataset, 
                                      batch_size=config["training_config"]["batch_size"], 
                                      shuffle=True, 
-                                     num_workers=8)
+                                     num_workers=2)
 
         print(f"Train: {len(train_dataloader) * config['training_config']['batch_size']} trajectories (first {max_length} steps)")
 

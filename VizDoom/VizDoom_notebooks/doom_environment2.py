@@ -13,6 +13,7 @@ import numpy as np
 from cv2 import resize
 import cv2
 import math
+import os 
 
 class DoomEnvironment():
     """
@@ -71,7 +72,9 @@ class DoomEnvironment():
         self.fixed_scenario = fixed_scenario
         self.is_train = is_train
         self.use_shaping = use_shaping
+        print("going to create game")
         self.game = self._create_game(params, idx, is_train, get_extra_info)
+        print("game created")
         self.screen_width = params['screen_width']
         self.screen_height = params['screen_height']       
         self.params = params
@@ -90,7 +93,7 @@ class DoomEnvironment():
     
     def _create_game(self, params, idx, is_train, get_extra_info=False):
         game = DoomGame()
-
+        print(os.getcwd())        
         VALID_SCENARIOS = ['my_way_home.cfg',
                            'health_gathering.cfg',
                            'health_gathering_supreme.cfg',
@@ -116,25 +119,25 @@ class DoomEnvironment():
                                  'two_color_maze{:003}.cfg',
                                  'custom_scenario{:003}.cfg',
                                  'custom_scenario_no_pil{:003}.cfg']
-        
 
+        print("inializing scenarios")
         if params['limit_actions'] in VALID_SCENARIOS:
             game.load_config(params['scenario_dir'] + params['scenario'])
         elif params['scenario'] in VALID_MULTI_SCENARIOS:
             assert params['multimaze']
             if not is_train and params['test_scenario_dir']:
                 filename = params['test_scenario_dir'] + params['scenario'].format(idx)
-                #print('loading file', filename)
+                print('loading file', filename)
                 game.load_config(filename)
             else:    
                 if not is_train:
                     print('WARNING, LOADING TRAINING DATA FOR TESTING, THIS MAY NOT BE WHAT YOU INTENDED!')
                 filename = params['scenario_dir'] + params['scenario'].format(idx)
-                #print('loading file', filename)
+                print('loading file', filename)
                 game.load_config(filename)        
         else:
             assert 0 , 'Invalid environment {}'.format(params['scenario'])
-            
+        print("scenarios inialized")
         if params['screen_size'] == '320X180':
             # TODO: Implement options for other resolutions
             game.set_screen_resolution(ScreenResolution.RES_320X180)
@@ -169,9 +172,18 @@ class DoomEnvironment():
             game.set_automap_render_textures(False)
             game.set_depth_buffer_enabled(True)
         
-        
-        game.init() 
-        
+        print("inializing game")
+        try:
+            game.init()
+            print("DoomGame initialized successfully!")
+        except FileNotFoundError as e:
+            print(f"Error: Configuration file not found: {e}")
+        except RuntimeError as e:
+            print(f"Error during DoomGame initialization: {e}")
+        except Exception as e:
+            print(f"Unexpected error: {e}")
+        # game.init() 
+        # print("game inializeds")        
         if GameVariable.HEALTH in game.get_available_game_variables():
             self.previous_health = game.get_game_variable(GameVariable.HEALTH) 
             
