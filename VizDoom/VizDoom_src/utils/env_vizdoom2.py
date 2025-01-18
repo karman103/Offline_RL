@@ -291,8 +291,10 @@ class DoomEnvironmentDisappear(object):
             last_action = self.game.get_last_action(),
             is_red = self.is_red_episode(),
         )
-        print(self.game.get_game_variable(GameVariable.KILLCOUNT))
-        print(self.game.get_game_variable(GameVariable.DEAD))
+        if self.game.get_game_variable(GameVariable.KILLCOUNT)>=1:
+          print("GOT A KILL!!!")
+        print("Agent kills",self.game.get_game_variable(GameVariable.KILLCOUNT))
+        print("agent deaths",self.game.get_game_variable(GameVariable.DEAD))
         return info
 
     def step(self, action, human_play=False):
@@ -311,8 +313,8 @@ class DoomEnvironmentDisappear(object):
 
         info = self.get_info() if self.use_info else None
 
-        print(self.game.get_game_variable(GameVariable.KILLCOUNT))
-        print(self.game.get_game_variable(GameVariable.DEAD))
+        # print(self.game.get_game_variable(GameVariable.KILLCOUNT))
+        # print(self.game.get_game_variable(GameVariable.DEAD))
         return obs, reward*self.reward_scaling, done, info
 
     def _check_health(self):
@@ -327,7 +329,7 @@ class DoomEnvironmentDisappear(object):
             return health_reward
 
         if self.game.get_game_variable(GameVariable.HEALTH) > self.previous_health:
-            # print('found healthkit')
+            print('found healthkit')
             health_reward = 1.0
 
         self.previous_health = self.game.get_game_variable(GameVariable.HEALTH)
