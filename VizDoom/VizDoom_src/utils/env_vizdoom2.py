@@ -293,12 +293,12 @@ class DoomEnvironmentDisappear(object):
             last_action = self.game.get_last_action(),
             is_red = self.is_red_episode(),
         )
-        if self.wandb:
+        if self.wandb and self.game.get_game_variable(GameVariable.KILLCOUNT)>=1:
           wandb.log({"Kill_count": self.game.get_game_variable(GameVariable.KILLCOUNT)})
         if self.game.get_game_variable(GameVariable.KILLCOUNT)>=1:
           print("GOT A KILL!!!")
-        print("Agent kills",self.game.get_game_variable(GameVariable.KILLCOUNT))
-        print("agent deaths",self.game.get_game_variable(GameVariable.DEAD)) 
+        # print("Agent kills",self.game.get_game_variable(GameVariable.KILLCOUNT))
+        # print("agent deaths",self.game.get_game_variable(GameVariable.DEAD)) 
         return info
 
     def step(self, action, human_play=False):
