@@ -249,8 +249,10 @@ def train(ckpt_path, config, train_dataloader, mean, std, max_segments, experime
     
                         #     return returns, ts
                         def optimize_pillar(color, seeds, config, wwandb, wcomet):
+                            # TODO: find ret
+                            print("RET IS",[config["online_inference_config"]["desired_return_1"]])
                             for ret in [config["online_inference_config"]["desired_return_1"]]:
-                                print("ret is",ret)
+                                print("RET IS",ret)
                                 returns = []
                                 ts = []
                                 attn_map_received = False

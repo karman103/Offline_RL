@@ -262,7 +262,7 @@ def get_returns_VizDoom(wandb,model, ret, seed, episode_timeout, context_length,
         pred_return = target_return[0,-1] - (reward/scale)
         target_return = torch.cat([target_return, pred_return.reshape(1, 1)], dim=1)
         timesteps = torch.cat([timesteps,torch.ones((1, 1), device=device, dtype=torch.long) * (1)], dim=1)
-        print(f"the reward in this episode is {reward}")
+        # print(f"the reward in this episode is {reward}")
         episode_return += reward
         episode_length += 1
         

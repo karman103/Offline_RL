@@ -525,22 +525,22 @@ class MemTransformerLM(nn.Module):
             if self.mode == 'doom':
                 B, B1, C, H, W = states.shape
                 states = states.reshape(-1, C, H, W).type(torch.float32).contiguous() 
-            elif self.mode == 'atari':
-                if len(states.shape) == 5:
-                    B, B1, C, H, W = states.shape
-                elif len(states.shape) == 6:
-                    B, B1, _, C, H, W = states.shape
-                else:
-                    B, B1, _ = states.shape
-                states = states.reshape(-1, 4, 84, 84).type(torch.float32).contiguous() 
-            elif self.mode == 'memory_maze':
-                B, B1, C, H, W = states.shape
-                states = states.reshape(-1, C, H, W).type(torch.float32).contiguous() 
-            elif self.mode == 'minigrid_memory':
-                B, B1, C, H, W = states.shape
-                states = states.reshape(-1, 3, 84, 84).type(torch.float32).contiguous() 
-            else:
-                B, B1, C = states.shape 
+            # elif self.mode == 'atari':
+            #     if len(states.shape) == 5:
+            #         B, B1, C, H, W = states.shape
+            #     elif len(states.shape) == 6:
+            #         B, B1, _, C, H, W = states.shape
+            #     else:
+            #         B, B1, _ = states.shape
+            #     states = states.reshape(-1, 4, 84, 84).type(torch.float32).contiguous() 
+            # elif self.mode == 'memory_maze':
+            #     B, B1, C, H, W = states.shape
+            #     states = states.reshape(-1, C, H, W).type(torch.float32).contiguous() 
+            # elif self.mode == 'minigrid_memory':
+            #     B, B1, C, H, W = states.shape
+            #     states = states.reshape(-1, 3, 84, 84).type(torch.float32).contiguous() 
+            # else:
+            #     B, B1, C = states.shape 
 
             state_embeddings = self.state_encoder(states) # (batch * block_size, n_embd)
             state_embeddings = state_embeddings.reshape(B, B1, self.d_embed)
@@ -790,7 +790,8 @@ class MemTransformerLM(nn.Module):
             #     self.loss_last = torch.tensor(0)
                 
             if self.mode == 'doom':
-                loss = F.cross_entropy(logits.reshape(-1, logits.size(-1)),
+              print("THE TARGET IS:",target.reshape(-1).long())
+              loss = F.cross_entropy(logits.reshape(-1, logits.size(-1)),
                                        target.reshape(-1).long())
 
             # if self.mode == 'memory_maze':
