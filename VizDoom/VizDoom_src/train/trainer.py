@@ -257,7 +257,7 @@ def train(ckpt_path, config, train_dataloader, mean, std, max_segments, experime
                                 ts = []
                                 attn_map_received = False
                                 for i in range(len(seeds)):
-                                  print("in optimize piller")
+                                  # print("in optimize piller")
                                   episode_return, act_list, t, _, _, attn_map = get_returns_VizDoom(wandb=wandb,model=model, ret=ret, seed=None, # seed=seeds[i], 
                                                                                           episode_timeout=episode_timeout, 
                                                                                           context_length=config["training_config"]["context_length"], 

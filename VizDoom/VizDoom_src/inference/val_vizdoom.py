@@ -101,7 +101,7 @@ def get_returns_VizDoom(wandb,model, ret, seed, episode_timeout, context_length,
 
         
     scene = 0
-    print(f"env_args is {env_args['scenario']}")
+    # print(f"env_args is {env_args['scenario']}")
     scenario = env_args['scenario_dir'] + env_args['scenario'].format(scene)
     config_env = scenario
 
