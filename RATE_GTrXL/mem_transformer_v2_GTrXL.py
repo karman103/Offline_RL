@@ -460,64 +460,65 @@ class MemTransformerLM(nn.Module):
         # them together.
         
         if self.mode in ['tmaze', 'aar']:
-            ''' TMAZE MODE '''
-            if not mems: mems = self.init_mems(states.device)
-            state_embeddings = self.state_encoder(states) # (batch * block_size, n_embd)
-            rtg_embeddings = self.ret_emb(rtgs)
+          pass
+            # ''' TMAZE MODE '''
+            # if not mems: mems = self.init_mems(states.device)
+            # state_embeddings = self.state_encoder(states) # (batch * block_size, n_embd)
+            # rtg_embeddings = self.ret_emb(rtgs)
 
-            B = state_embeddings.shape[0]
-            B1 = state_embeddings.shape[1]
-            if actions is not None:
-                use_long = False
-                for name, module in self.action_embeddings.named_children():
-                    if isinstance(module, nn.Embedding):
-                        use_long = True
-                if use_long:
-                    if self.mode == 'tmaze':
-                        actions = torch.where(actions == -10, torch.tensor(4), actions)
-                    elif self.mode == 'aar':
-                        actions = torch.where(actions == -10, torch.tensor(3), actions)
-                    actions = actions.to(dtype=torch.long, device=states.device)
-                    action_embeddings = self.action_embeddings(actions).squeeze(2) # (batch, block_size, n_embd)
-                else:
-                    action_embeddings = self.action_embeddings(actions) # (batch, block_size, n_embd)
-                token_embeddings = torch.zeros((B, B1*3 - int(target is None), self.d_embed), dtype=torch.float32, device=state_embeddings.device)
-                token_embeddings[:, ::3, :] = rtg_embeddings #+ time_embeddings
-                token_embeddings[:, 1::3, :] = state_embeddings #+ time_embeddings
-                token_embeddings[:, 2::3, :] = action_embeddings[:,-B1 + int(target is None):,:]
+            # B = state_embeddings.shape[0]
+            # B1 = state_embeddings.shape[1]
+            # if actions is not None:
+            #     use_long = False
+            #     for name, module in self.action_embeddings.named_children():
+            #         if isinstance(module, nn.Embedding):
+            #             use_long = True
+            #     if use_long:
+            #         if self.mode == 'tmaze':
+            #             actions = torch.where(actions == -10, torch.tensor(4), actions)
+            #         elif self.mode == 'aar':
+            #             actions = torch.where(actions == -10, torch.tensor(3), actions)
+            #         actions = actions.to(dtype=torch.long, device=states.device)
+            #         action_embeddings = self.action_embeddings(actions).squeeze(2) # (batch, block_size, n_embd)
+            #     else:
+            #         action_embeddings = self.action_embeddings(actions) # (batch, block_size, n_embd)
+            #     token_embeddings = torch.zeros((B, B1*3 - int(target is None), self.d_embed), dtype=torch.float32, device=state_embeddings.device)
+            #     token_embeddings[:, ::3, :] = rtg_embeddings #+ time_embeddings
+            #     token_embeddings[:, 1::3, :] = state_embeddings #+ time_embeddings
+            #     token_embeddings[:, 2::3, :] = action_embeddings[:,-B1 + int(target is None):,:]
 
-            else:
-                token_embeddings = torch.zeros((B, B1*2, self.d_embed), dtype=torch.float32, device=state_embeddings.device)
-                token_embeddings[:,::2,:] = rtg_embeddings
-                token_embeddings[:,1::2,:] = state_embeddings
+            # else:
+            #     token_embeddings = torch.zeros((B, B1*2, self.d_embed), dtype=torch.float32, device=state_embeddings.device)
+            #     token_embeddings[:,::2,:] = rtg_embeddings
+            #     token_embeddings[:,1::2,:] = state_embeddings
 
-            hidden, new_mems = self._forward(token_embeddings, mems=mems, mem_tokens=mem_tokens) #hidden.shape = (total_len, bs, emb_dim) new_mems[i].shape = (MEM_LEN, bs, d_model)
-            hidden = hidden.permute(1,0,2)
-            num_mem = self.num_mem_tokens
-            if self.num_mem_tokens > 0:
-                if self.mem_at_end:
-                    tgt_len = token_embeddings.shape[1]
-                    mem_tokens_write = hidden[:, -num_mem:, :]
-                else:
-                    tgt_len = token_embeddings.shape[1]
-                    mem_tokens_write = hidden[:, -tgt_len-num_mem:-tgt_len, :]
+            # hidden, new_mems = self._forward(token_embeddings, mems=mems, mem_tokens=mem_tokens) #hidden.shape = (total_len, bs, emb_dim) new_mems[i].shape = (MEM_LEN, bs, d_model)
+            # hidden = hidden.permute(1,0,2)
+            # num_mem = self.num_mem_tokens
+            # if self.num_mem_tokens > 0:
+            #     if self.mem_at_end:
+            #         tgt_len = token_embeddings.shape[1]
+            #         mem_tokens_write = hidden[:, -num_mem:, :]
+            #     else:
+            #         tgt_len = token_embeddings.shape[1]
+            #         mem_tokens_write = hidden[:, -tgt_len-num_mem:-tgt_len, :]
 
-                if self.n_head_ca != 0:
-                    new_mem_tokens = F.relu(hidden[:, -num_mem:, :])
-                    mem_tokens = mem_tokens.permute(1,0,2)
-                    mask_mem_mem = torch.ones((new_mem_tokens.shape[1], new_mem_tokens.shape[1]), dtype=torch.bool).to(new_mem_tokens.device)
-                    mem_tokens_write, _ = self.mha_mem_to_mem(mem_tokens, new_mem_tokens, new_mem_tokens, attn_mask=mask_mem_mem)
+            #     if self.n_head_ca != 0:
+            #         new_mem_tokens = F.relu(hidden[:, -num_mem:, :])
+            #         mem_tokens = mem_tokens.permute(1,0,2)
+            #         mask_mem_mem = torch.ones((new_mem_tokens.shape[1], new_mem_tokens.shape[1]), dtype=torch.bool).to(new_mem_tokens.device)
+            #         mem_tokens_write, _ = self.mha_mem_to_mem(mem_tokens, new_mem_tokens, new_mem_tokens, attn_mask=mask_mem_mem)
 
-            if self.mem_at_end:
-                logits = self.head(hidden)[:, num_mem:-num_mem]
-            else:
-                tgt_len = token_embeddings.shape[1] # total_len
-                logits = self.head(hidden)[:, -tgt_len:] # was tgt_len # logits: torch.Size([64, 301, 4])
+            # if self.mem_at_end:
+            #     logits = self.head(hidden)[:, num_mem:-num_mem]
+            # else:
+            #     tgt_len = token_embeddings.shape[1] # total_len
+            #     logits = self.head(hidden)[:, -tgt_len:] # was tgt_len # logits: torch.Size([64, 301, 4])
             
-            if actions is not None:
-                logits = logits[:, 1::3, :]
-            else:
-                logits = logits[:, 1:, :]
+            # if actions is not None:
+            #     logits = logits[:, 1::3, :]
+            # else:
+            #     logits = logits[:, 1:, :]
         
         else:
             if not mems: mems = self.init_mems(states.device)
@@ -548,29 +549,36 @@ class MemTransformerLM(nn.Module):
             # time_embeddings = self.embed_timestep(timesteps)
 
             if actions is not None:
+                print("action is None")
                 use_long = False
                 for name, module in self.action_embeddings.named_children():
                     if isinstance(module, nn.Embedding):
                         use_long = True
                 if use_long:
-                    if self.mode != 'minigrid_memory':
-                        actions = actions.to(dtype=torch.long, device=states.device)
-                        action_embeddings = self.action_embeddings(actions).squeeze(2) # (batch, block_size, n_embd)
-                    elif self.mode == 'minigrid_memory':
-                        actions = torch.where(actions == -10, torch.tensor(3), actions)
-                        actions = actions.to(dtype=torch.long, device=states.device)
-                    action_embeddings = self.action_embeddings(actions).squeeze(2) # (batch, block_size, n_embd)
+                    # if self.mode != 'minigrid_memory':
+                    #     actions = actions.to(dtype=torch.long, device=states.device)
+                    #     action_embeddings = self.action_embeddings(actions).squeeze(2) # (batch, block_size, n_embd)
+                    # elif self.mode == 'minigrid_memory':
+                    #     actions = torch.where(actions == -10, torch.tensor(3), actions)
+                    #     actions = actions.to(dtype=torch.long, device=states.device)
+                    action_embeddings = self.action_embeddings(actions.long()).squeeze(2) # (batch, block_size, n_embd)
+                    # ADDING taget embeddings
+                    # target = self.action_embeddings(target.long()).squeeze(2) # (batch, block_size, n_embd)
+
                 else:
-                    action_embeddings = self.action_embeddings(actions) # (batch, block_size, n_embd)
-                if self.mode == 'memory_maze':
-                    if use_long:
-                        action_embeddings = self.action_embeddings(actions).squeeze(1).squeeze(2)
+                    action_embeddings = self.action_embeddings(actions) # (batch, block_size, n_embd
+                    # target = self.action_embeddings(target) # (batch, block_size, n_embd
+
+                # if self.mode == 'memory_maze':
+                #     if use_long:
+                #         action_embeddings = self.action_embeddings(actions).squeeze(1).squeeze(2)
                 
                 token_embeddings = torch.zeros((B, B1*3 - int(target is None), self.d_embed), dtype=torch.float32, device=state_embeddings.device)
                 token_embeddings[:, ::3, :] = rtg_embeddings #+ time_embeddings
                 token_embeddings[:, 1::3, :] = state_embeddings #+ time_embeddings
                 token_embeddings[:, 2::3, :] = action_embeddings[:,-B1 + int(target is None):,:] #+ time_embeddings[:,-states.shape[1] + int(target is None):,:]
             else:
+              # this is for the first state, reward training
                 token_embeddings = torch.zeros((B, B1*2, self.d_embed), dtype=torch.float32, device=state_embeddings.device)
                 token_embeddings[:,::2,:] = rtg_embeddings #+ time_embeddings # really just [:,0,:]
                 token_embeddings[:,1::2,:] = state_embeddings #+ time_embeddings # really just [:,1,:]
@@ -601,9 +609,14 @@ class MemTransformerLM(nn.Module):
                 logits = self.head(hidden)[:, -tgt_len:] # was tgt_len
 
             if actions is not None:
+            # ADDING taget here
                 logits = logits[:, 1::3, :]
+                # target = target[:, 1::3, :]
+
             else:
+                # target = target[:, 1:, :]
                 logits = logits[:, 1:, :]
+
                 
         #################################################### LOSS CALCULATION ######################################################################
         
@@ -790,10 +803,19 @@ class MemTransformerLM(nn.Module):
             #     self.loss_last = torch.tensor(0)
                 
             if self.mode == 'doom':
+              if target is None:
+                print("TARGET is None")
+              else:
+                print("Target shape,",target.shape)
+              print("actions shape",actions.shape)
               print("THE TARGET IS:",target.reshape(-1).long())
+              print("THE actions IS:",logits.reshape(-1).long())
+
               loss = F.cross_entropy(logits.reshape(-1, logits.size(-1)),
                                        target.reshape(-1).long())
-
+              # loss = F.cross_entropy(actions.reshape(-1,actions.size(-1)),
+              #                          target.reshape(-1).long())
+              print("the loss is", loss)
             # if self.mode == 'memory_maze':
             #     loss = F.cross_entropy(logits.reshape(-1, logits.size(-1)),
             #                            target.reshape(-1).long())
@@ -825,7 +847,7 @@ class MemTransformerLM(nn.Module):
             output = output, mem_tokens_write.permute(1,0,2)
         else:
             output = output, None
-        
+        # print("Output is",output)
         return output
 
 ######################################################################################    

@@ -60,7 +60,9 @@ def train(ckpt_path, config, train_dataloader, mean, std, max_segments, experime
     raw_model = model.module if hasattr(model, "module") else model
         
     model.to(device)
+    print("training starts")
     model.train()
+    print("training ends")
     
     wwandb = config["wandb_config"]["wwandb"]
     
@@ -85,10 +87,12 @@ def train(ckpt_path, config, train_dataloader, mean, std, max_segments, experime
     for epoch in pbar:
         train_imgs = []
         is_train = True
+        print("training starts")
         model.train()
+        print("trainaing ends")
         for it, batch in enumerate(train_dataloader):
             s, a, rtg, d, timesteps, masks = batch
-
+            print("rtg is ",rtg.shape)
             if config["data_config"]["normalize"] == 2:
                 _b, _l, _c, _h, _w = s.shape
                 s = s.reshape(_b*_l, _c, _h, _w)
@@ -122,13 +126,13 @@ def train(ckpt_path, config, train_dataloader, mean, std, max_segments, experime
                 elif raw_model.mem_tokens is not None:
                     mem_tokens = raw_model.mem_tokens.repeat(1, r1.shape[0], 1)
 
-                if config["model_config"]["num_mem_tokens"] > 0:
-                    mean_tokens = torch.mean(mem_tokens, dim=1)[0]
+                # if config["model_config"]["num_mem_tokens"] > 0:
+                #     mean_tokens = torch.mean(mem_tokens, dim=1)[0]
                     
-                    if tokens_dict[block_part] is not None:
-                        cos_sim = cos(mean_tokens, tokens_dict[block_part]).item()
-                    else:
-                        cos_sim = None
+                #     if tokens_dict[block_part] is not None:
+                #         cos_sim = cos(mean_tokens, tokens_dict[block_part]).item()
+                #     else:
+                #         cos_sim = None
 
                 with torch.set_grad_enabled(is_train):
                     optimizer.zero_grad()
@@ -137,6 +141,8 @@ def train(ckpt_path, config, train_dataloader, mean, std, max_segments, experime
                     else model(x1, y1, r1, y1, t1, mem_tokens=mem_tokens, masks=masks1)
                     memory = res[0][2:]
                     logits, train_loss = res[0][0], res[0][1]
+                    print("logits are,",logits.shape)
+                    print("tarin_loss is",train_loss)
                     mem_tokens = res[1]
                 
                     if wwandb:
@@ -144,28 +150,28 @@ def train(ckpt_path, config, train_dataloader, mean, std, max_segments, experime
                     elif wcomet:
                         experiment.log_metric("train_loss", train_loss.item(), step=it_counter)
 
-                    if config["model_config"]["num_mem_tokens"] > 0:
-                        if wwandb:
-                            wandb.log({f"cos_1st_token_block_{block_part}": cos_sim})
-                            tokens_dict[block_part] = mean_tokens
-                        elif wcomet:
-                            experiment.log_metric(f"cos_1st_token_block_{block_part}", cos_sim, step=it_counter)
-                            tokens_dict[block_part] = mean_tokens
+                    # if config["model_config"]["num_mem_tokens"] > 0:
+                    #     if wwandb:
+                    #         wandb.log({f"cos_1st_token_block_{block_part}": cos_sim})
+                    #         tokens_dict[block_part] = mean_tokens
+                    #     elif wcomet:
+                    #         experiment.log_metric(f"cos_1st_token_block_{block_part}", cos_sim, step=it_counter)
+                    #         tokens_dict[block_part] = mean_tokens
 
-                        if ((epoch + 1) % int(config["training_config"]["ckpt_epoch"])) == 0 or epoch == config["training_config"]["epochs"] - 1 or (epoch + 1) == 1:
-                            if it == len(train_dataloader)-1:
-                                if ckpt_dict[block_part] is not None:
-                                    cos_sim_ckpt= cos(mean_tokens, ckpt_dict[block_part]).item()
-                                else:
-                                    cos_sim_ckpt = None
+                    #     if ((epoch + 1) % int(config["training_config"]["ckpt_epoch"])) == 0 or epoch == config["training_config"]["epochs"] - 1 or (epoch + 1) == 1:
+                    #         if it == len(train_dataloader)-1:
+                    #             if ckpt_dict[block_part] is not None:
+                    #                 cos_sim_ckpt= cos(mean_tokens, ckpt_dict[block_part]).item()
+                    #             else:
+                    #                 cos_sim_ckpt = None
 
-                                if wwandb:
-                                    wandb.log({f"ckpt_cos_1st_token_block_{block_part}": cos_sim_ckpt})
-                                elif wcomet:
-                                    experiment.log_metric(f"ckpt_cos_1st_token_block_{block_part}", cos_sim_ckpt, step=it_counter)
+                    #             if wwandb:
+                    #                 wandb.log({f"ckpt_cos_1st_token_block_{block_part}": cos_sim_ckpt})
+                    #             elif wcomet:
+                    #                 experiment.log_metric(f"ckpt_cos_1st_token_block_{block_part}", cos_sim_ckpt, step=it_counter)
                             
 
-                                ckpt_dict[block_part] = mean_tokens
+                    #             ckpt_dict[block_part] = mean_tokens
 
                 if is_train:
                     model.zero_grad()
@@ -279,12 +285,12 @@ def train(ckpt_path, config, train_dataloader, mean, std, max_segments, experime
                                 returns_mean = np.mean(returns)
                                 lifetime_mean = np.mean(ts)
 
-                                if wwandb:
-                                    wandb.log({f"LifeTimeMean_{color}_{ret}": lifetime_mean, 
-                                            f"ReturnsMean_{color}_{ret}": returns_mean})
-                                elif wcomet:
-                                    experiment.log_metrics({f"LifeTimeMean_{color}_{ret}": lifetime_mean, 
-                                                           f"ReturnsMean_{color}_{ret}": returns_mean}, step=it_counter)
+                                # if wwandb:
+                                #     wandb.log({f"LifeTimeMean_{color}_{ret}": lifetime_mean, 
+                                #             f"ReturnsMean_{color}_{ret}": returns_mean})
+                                # elif wcomet:
+                                #     experiment.log_metrics({f"LifeTimeMean_{color}_{ret}": lifetime_mean, 
+                                #                            f"ReturnsMean_{color}_{ret}": returns_mean}, step=it_counter)
     
                             return returns, ts
                         total_returns, total_ts = [], []
@@ -293,16 +299,16 @@ def train(ckpt_path, config, train_dataloader, mean, std, max_segments, experime
 
                         # 
                         # RED PILLAR
-                        seeds_red = reds[::SKIP_RETURN]
-                        red_returns, red_ts = optimize_pillar("red", seeds_red, config, wwandb, wcomet)
-                        total_returns += red_returns
-                        total_ts += red_ts
+                        # seeds_red = reds[::SKIP_RETURN]
+                        # red_returns, red_ts = optimize_pillar("red", seeds_red, config, wwandb, wcomet)
+                        # total_returns += red_returns
+                        # total_ts += red_ts
 
-                        # GREEN PILLAR
-                        seeds_green = greens[::SKIP_RETURN]
-                        green_returns, green_ts = optimize_pillar("green", seeds_green, config, wwandb, wcomet)
-                        total_returns += green_returns
-                        total_ts += green_ts
+                        # # GREEN PILLAR
+                        # seeds_green = greens[::SKIP_RETURN]
+                        # green_returns, green_ts = optimize_pillar("green", seeds_green, config, wwandb, wcomet)
+                        # total_returns += green_returns
+                        # total_ts += green_ts
 
                         total_returns = np.mean(total_returns)
                         total_ts = np.mean(total_ts)
