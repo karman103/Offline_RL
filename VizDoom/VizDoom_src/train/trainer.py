@@ -313,7 +313,7 @@ def train(ckpt_path, config, train_dataloader, mean, std, max_segments, experime
                         total_returns = np.mean(total_returns)
                         total_ts = np.mean(total_ts)
 
-                        if wwandb:
+                        if wandb:
                             wandb.log({f"LifeTimeMean_{config['online_inference_config']['desired_return_1']}": total_ts, 
                                        f"ReturnsMean_{config['online_inference_config']['desired_return_1']}": total_returns})
                         elif wcomet:

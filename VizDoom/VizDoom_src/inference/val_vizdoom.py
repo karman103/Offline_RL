@@ -149,31 +149,32 @@ def get_returns_VizDoom(wandb,model, ret, seed, episode_timeout, context_length,
         rewards = torch.cat([rewards, torch.zeros(1, device=device)])
         
         if config["model_mode"] != 'DT' and config["model_mode"] != 'DTXL':
-            if actions.shape[0] > HISTORY_LEN:
-                segment+=1
+          pass
+        #     if actions.shape[0] > HISTORY_LEN:
+        #         segment+=1
                 
-                if prompt_steps==0:
-                    actions = actions[-1:,:]
-                    states = states[:, -1:, :, :, :]
-                    target_return = target_return[:,-1:]
-                    timesteps = timesteps[:, -1:]
-                else:
-                    actions = actions[-prompt_steps:,:]
-                    states = states[:, -prompt_steps:, :, :, :]
-                    target_return = target_return[:,-prompt_steps:]
-                    timesteps = timesteps[:, -prompt_steps:]
+        #         if prompt_steps==0:
+        #             actions = actions[-1:,:]
+        #             states = states[:, -1:, :, :, :]
+        #             target_return = target_return[:,-1:]
+        #             timesteps = timesteps[:, -1:]
+        #         else:
+        #             actions = actions[-prompt_steps:,:]
+        #             states = states[:, -prompt_steps:, :, :, :]
+        #             target_return = target_return[:,-prompt_steps:]
+        #             timesteps = timesteps[:, -prompt_steps:]
                     
-                if t%(context_length)==0 and t>5:
-                    if use_only_last_mem_token:
-                        mem_tokens = saved_mem
-                    else:
-                        mem_tokens = new_mem
+        #         if t%(context_length)==0 and t>5:
+        #             if use_only_last_mem_token:
+        #                 mem_tokens = saved_mem
+        #             else:
+        #                 mem_tokens = new_mem
                     
-                    saved_context = new_notes
+        #             saved_context = new_notes
                     
-                    if create_video:
-                        out = torch.norm(mem_tokens).item() if mem_tokens is not None else None
-                        print(f't: {t}, NEW MEMORY: {out}')
+        #             if create_video:
+        #                 out = torch.norm(mem_tokens).item() if mem_tokens is not None else None
+        #                 print(f't: {t}, NEW MEMORY: {out}')
                     
         else:
             if actions.shape[0] > HISTORY_LEN:

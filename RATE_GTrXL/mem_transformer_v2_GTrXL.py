@@ -549,7 +549,7 @@ class MemTransformerLM(nn.Module):
             # time_embeddings = self.embed_timestep(timesteps)
 
             if actions is not None:
-                print("action is None")
+                # print("action is not None")
                 use_long = False
                 for name, module in self.action_embeddings.named_children():
                     if isinstance(module, nn.Embedding):
@@ -801,8 +801,8 @@ class MemTransformerLM(nn.Module):
             #     self.accuracy = 0
             #     self.loss_all = torch.tensor(0)
             #     self.loss_last = torch.tensor(0)
-                
             if self.mode == 'doom':
+              probs = torch.nn.functional.softmax(logits, dim=-1)
               if target is None:
                 print("TARGET is None")
               else:

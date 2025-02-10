@@ -277,7 +277,8 @@ class DoomEnvironmentDisappear(object):
             reward = self.game.make_action(self.action_map[action], self.frame_skip)
         # We shape rewards in health gathering to encourage collection of health packs
         if not self.use_shaping:
-            reward += self._check_health()
+            pass
+            # reward += self._check_health()
         else:
             # alternatively ViZDoom offers a shaping reward in some scenarios
             current_shaping_reward = doom_fixed_to_double(self.game.get_game_variable(GameVariable.USER1))
@@ -319,6 +320,8 @@ class DoomEnvironmentDisappear(object):
 
         # print(self.game.get_game_variable(GameVariable.KILLCOUNT))
         # print(self.game.get_game_variable(GameVariable.DEAD))
+        return obs, reward, done, info
+
         return obs, reward*self.reward_scaling, done, info
 
     def _check_health(self):
