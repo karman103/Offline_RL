@@ -142,7 +142,7 @@ def train(ckpt_path, config, train_dataloader, mean, std, max_segments, experime
                     memory = res[0][2:]
                     logits, train_loss = res[0][0], res[0][1]
                     print("logits are,",logits.shape)
-                    print("tarin_loss is",train_loss)
+                    print("train_loss is",train_loss)
                     mem_tokens = res[1]
                 
                     if wwandb:

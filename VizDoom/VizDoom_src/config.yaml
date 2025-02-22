@@ -17,7 +17,7 @@ training_config:
   warmup_steps: 10000  # 100
   final_tokens: 10000000
   grad_norm_clip: 1.0 # 1.0
-  epochs: 100 #250
+  epochs: 500 #100 or 250
   ckpt_epoch: 2
   use_erl_stop: False
   # inference during training
@@ -51,5 +51,5 @@ model_config:
 online_inference_config:
   use_argmax: False # False
   episode_timeout: 4200 # 2100
-  desired_return_1: 990 # 56.5 changed this from 56.5 to 99
+  desired_return_1: 100 # 56.5 changed this from 56.5 to 99 must be 1.1 times the max return
   # desired_return_2: 56.5 # 56.5

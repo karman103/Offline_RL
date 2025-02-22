@@ -43,9 +43,17 @@ class ViZDoomIterDataset(Dataset):
         return discount_cumsum
     
     def filter_trajectories(self):
+        print("Within filter_trajectories: ")
         for idx in tqdm(range(len(self.file_list))):
             file_path = os.path.join(self.directory, self.file_list[idx])
             data = np.load(file_path)
+            print("max_length")
+            print(self.max_length)
+            print("data: observations shape (should equal max_length before filtered_list is updated):")
+            print(data['observations'].shape)
+            print("filtered_list:")
+            print(self.filtered_list)
+            print("length of filtered_list: " + str(len(self.filtered_list)))
             if data['observations'].shape[0] == self.max_length:
             # if data['obs'].shape[0] == self.max_length:
                 self.filtered_list.append(self.file_list[idx])
