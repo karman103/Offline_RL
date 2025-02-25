@@ -273,8 +273,8 @@ def train(ckpt_path, config, train_dataloader, mean, std, max_segments, experime
                                                                                           std=STD,
                                                                                           use_argmax=config["online_inference_config"]["use_argmax"],
                                                                                           create_video=False)
-                                  if wwandb:
-                                    wandb.log({"episode_return:": episode_return})
+                                  # if wandb:
+                                  wandb.log({"episode_return:": episode_return})
                                   print(f"debug info: episode return is {episode_return} and act_list is {act_list}")
                                   returns.append(episode_return)
                                   t *= FRAME_SKIP

@@ -802,20 +802,20 @@ class MemTransformerLM(nn.Module):
             #     self.loss_all = torch.tensor(0)
             #     self.loss_last = torch.tensor(0)
             if self.mode == 'doom':
-              probs = torch.nn.functional.softmax(logits, dim=-1)
-              if target is None:
-                print("TARGET is None")
-              else:
-                print("Target shape,",target.shape)
-              print("actions shape",actions.shape)
-              print("THE TARGET IS:",target.reshape(-1).long())
-              print("THE actions IS:",logits.reshape(-1).long())
+              # probs = torch.nn.functional.softmax(logits, dim=-1)
+              # if target is None:
+              #   print("TARGET is None")
+              # else:
+              #   print("Target shape,",target.shape)
+              # print("actions shape",actions.shape)
+              # print("THE TARGET IS:",target.reshape(-1).long())
+              # print("THE actions IS:",logits.reshape(-1).long())
 
               loss = F.cross_entropy(logits.reshape(-1, logits.size(-1)),
                                        target.reshape(-1).long())
               # loss = F.cross_entropy(actions.reshape(-1,actions.size(-1)),
               #                          target.reshape(-1).long())
-              print("the loss is", loss)
+              # print("the loss is", loss)
             # if self.mode == 'memory_maze':
             #     loss = F.cross_entropy(logits.reshape(-1, logits.size(-1)),
             #                            target.reshape(-1).long())

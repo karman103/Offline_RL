@@ -171,7 +171,7 @@ if __name__ == '__main__':
         train_dataloader = DataLoader(train_dataset, 
                                      batch_size=config["training_config"]["batch_size"], 
                                      shuffle=True, 
-                                     num_workers=4)
+                                     num_workers=2)
 
         print(f"Train: {len(train_dataloader) * config['training_config']['batch_size']} trajectories (first {max_length} steps)")
 
