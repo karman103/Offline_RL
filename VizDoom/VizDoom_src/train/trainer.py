@@ -299,16 +299,16 @@ def train(ckpt_path, config, train_dataloader, mean, std, max_segments, experime
 
                         # 
                         # RED PILLAR
-                        # seeds_red = reds[::SKIP_RETURN]
-                        # red_returns, red_ts = optimize_pillar("red", seeds_red, config, wwandb, wcomet)
-                        # total_returns += red_returns
-                        # total_ts += red_ts
+                        seeds_red = reds[::SKIP_RETURN]
+                        red_returns, red_ts = optimize_pillar("red", seeds_red, config, wwandb, wcomet)
+                        total_returns += red_returns
+                        total_ts += red_ts
 
                         # # GREEN PILLAR
-                        # seeds_green = greens[::SKIP_RETURN]
-                        # green_returns, green_ts = optimize_pillar("green", seeds_green, config, wwandb, wcomet)
-                        # total_returns += green_returns
-                        # total_ts += green_ts
+                        seeds_green = greens[::SKIP_RETURN]
+                        green_returns, green_ts = optimize_pillar("green", seeds_green, config, wwandb, wcomet)
+                        total_returns += green_returns
+                        total_ts += green_ts
 
                         total_returns = np.mean(total_returns)
                         total_ts = np.mean(total_ts)

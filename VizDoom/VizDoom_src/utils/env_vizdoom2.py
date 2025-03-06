@@ -298,7 +298,7 @@ class DoomEnvironmentDisappear(object):
           wandb.log({"Kill_count": self.game.get_game_variable(GameVariable.KILLCOUNT)})
         if self.game.get_game_variable(GameVariable.KILLCOUNT)>=1:
           print("GOT A KILL!!!")
-        # print("Agent kills",self.game.get_game_variable(GameVariable.KILLCOUNT))
+        print("Agent kills",self.game.get_game_variable(GameVariable.KILLCOUNT))
         # print("agent deaths",self.game.get_game_variable(GameVariable.DEAD)) 
         return info
 
@@ -306,8 +306,8 @@ class DoomEnvironmentDisappear(object):
         reward = self.make_action(action, human_play)
         done = self.is_episode_finished()
 
-        #if done:
-            #print('vizdoom episode is finished!')
+        if done:
+            print('vizdoom episode is finished!')
 
         obs = self.get_observation()
         if not done:
