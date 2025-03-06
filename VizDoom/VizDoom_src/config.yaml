@@ -5,7 +5,7 @@ wandb_config:
 
 data_config:
   gamma: 1.0
-  normalize: 1 # 0 - not normalize, 1 - /255., 2 - standard scaling
+  normalize: 0 # 0 - not normalize, 1 - /255., 2 - standard scaling
 
 training_config:
   learning_rate: 0.0003 # 1e-3
