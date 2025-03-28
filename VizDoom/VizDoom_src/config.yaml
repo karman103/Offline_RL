@@ -14,10 +14,10 @@ training_config:
   beta_2: 0.95
   weight_decay: 0.1 
   batch_size: 64 # 128
-  warmup_steps: 10000  # 100
+  warmup_steps: 100  # 100
   final_tokens: 10000000
   grad_norm_clip: 1.0 # 1.0
-  epochs: 500 #100 or 250
+  epochs: 100 #100 or 250
   ckpt_epoch: 2
   use_erl_stop: False
   # inference during training

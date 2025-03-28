@@ -17,7 +17,14 @@ from scipy.stats import sem
 import warnings
 warnings.filterwarnings('ignore')
 import torch.nn as nn
+frames=[]
+import imageio
+import os
+from PIL import Image
 
+def save_video(frames, filename='eval_episode.mp4', fps=30):
+    os.makedirs(os.path.dirname(filename), exist_ok=True)
+    imageio.mimsave(filename, frames, fps=fps)
 
 # seeds
 # TODO: get rid of this
@@ -218,7 +225,7 @@ def train(ckpt_path, config, train_dataloader, mean, std, max_segments, experime
                 if config["model_config"]["mode"] == 'doom':
                     model.eval()
                     with torch.no_grad():
-                        FRAME_SKIP = 2
+                        FRAME_SKIP = 4
                         
                         
                         # def optimize_pillar(color, seeds, config, wwandb, wcomet):
@@ -255,7 +262,7 @@ def train(ckpt_path, config, train_dataloader, mean, std, max_segments, experime
     
                         #     return returns, ts
                         def optimize_pillar(color, seeds, config, wwandb, wcomet):
-                            # TODO: find ret
+                            # TODO: find ret .... it is desired return
                             print("RET IS",[config["online_inference_config"]["desired_return_1"]])
                             for ret in [config["online_inference_config"]["desired_return_1"]]:
                                 print("RET IS",ret)
@@ -264,7 +271,7 @@ def train(ckpt_path, config, train_dataloader, mean, std, max_segments, experime
                                 attn_map_received = False
                                 for i in range(len(seeds)):
                                   # print("in optimize piller")
-                                  episode_return, act_list, t, _, _, attn_map = get_returns_VizDoom(wandb=wandb,model=model, ret=ret, seed=None, # seed=seeds[i], 
+                                  episode_return, act_list, t, out_states, _, attn_map = get_returns_VizDoom(wandb=wandb,model=model, ret=ret, seed=None, # seed=seeds[i], 
                                                                                           episode_timeout=episode_timeout, 
                                                                                           context_length=config["training_config"]["context_length"], 
                                                                                           device=device, act_dim=config["model_config"]["ACTION_DIM"], 
@@ -273,6 +280,10 @@ def train(ckpt_path, config, train_dataloader, mean, std, max_segments, experime
                                                                                           std=STD,
                                                                                           use_argmax=config["online_inference_config"]["use_argmax"],
                                                                                           create_video=False)
+                                  print(attn_map)
+                                  out_states=np.transpose(out_states,(1,2,0))
+                                  print(out_states)
+                                  frames.append(out_states)
                                   # if wandb:
                                   wandb.log({"episode_return:": episode_return})
                                   print(f"debug info: episode return is {episode_return} and act_list is {act_list}")
@@ -300,13 +311,13 @@ def train(ckpt_path, config, train_dataloader, mean, std, max_segments, experime
                         # 
                         # RED PILLAR
                         seeds_red = reds[::SKIP_RETURN]
-                        red_returns, red_ts = optimize_pillar("red", seeds_red, config, wwandb, wcomet)
+                        red_returns, red_ts = optimize_pillar("red", seeds_red, config, wandb, wcomet)
                         total_returns += red_returns
                         total_ts += red_ts
 
                         # # GREEN PILLAR
                         seeds_green = greens[::SKIP_RETURN]
-                        green_returns, green_ts = optimize_pillar("green", seeds_green, config, wwandb, wcomet)
+                        green_returns, green_ts = optimize_pillar("green", seeds_green, config, wandb, wcomet)
                         total_returns += green_returns
                         total_ts += green_ts
 
@@ -327,5 +338,7 @@ def train(ckpt_path, config, train_dataloader, mean, std, max_segments, experime
             elif wcomet:
                 experiment.log_metrics({"checkpoint_step": epoch+1}, step=it_counter)
             torch.save(model.state_dict(), ckpt_path + str(epoch+1) + '_KTD.pth')
-            
+    save_video(frames, filename=f'my_video.mp4', fps=30)
+
+
     return model
