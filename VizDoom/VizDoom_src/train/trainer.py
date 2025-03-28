@@ -22,8 +22,11 @@ import imageio
 import os
 from PIL import Image
 
-def save_video(frames, filename='eval_episode.mp4', fps=30):
-    os.makedirs(os.path.dirname(filename), exist_ok=True)
+
+def save_video(frames, filename='video.mp4', fps=30):
+    dirname = os.path.dirname(filename)
+    if dirname != '':
+        os.makedirs(dirname, exist_ok=True)
     imageio.mimsave(filename, frames, fps=fps)
 
 # seeds
@@ -281,9 +284,15 @@ def train(ckpt_path, config, train_dataloader, mean, std, max_segments, experime
                                                                                           use_argmax=config["online_inference_config"]["use_argmax"],
                                                                                           create_video=False)
                                   print(attn_map)
-                                  out_states=np.transpose(out_states,(1,2,0))
+                                  out_states = np.stack(out_states)  # shape: (len(out_states), ...) 
+                                  print("the out states shape is",out_states.shape)
                                   print(out_states)
-                                  frames.append(out_states)
+
+                                  # out_states=np.transpose(out_states,(1,2,0))
+                                  for i in range(out_states.shape[0]):
+                                    frame = out_states[i, 0, 0]  # shape: (3, 64, 112)
+                                    frame = np.transpose(frame, (1, 2, 0))  # shape: (64, 112, 3)
+                                    frames.append(frame.astype(np.uint8))  # ensure it's uint8 for imageio
                                   # if wandb:
                                   wandb.log({"episode_return:": episode_return})
                                   print(f"debug info: episode return is {episode_return} and act_list is {act_list}")
@@ -338,7 +347,7 @@ def train(ckpt_path, config, train_dataloader, mean, std, max_segments, experime
             elif wcomet:
                 experiment.log_metrics({"checkpoint_step": epoch+1}, step=it_counter)
             torch.save(model.state_dict(), ckpt_path + str(epoch+1) + '_KTD.pth')
-    save_video(frames, filename=f'my_video.mp4', fps=30)
+            save_video(frames, filename=f'my_video.mp4', fps=30)
 
 
     return model
